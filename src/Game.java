@@ -1,3 +1,5 @@
+
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -24,36 +26,39 @@ public class Game {
 	Pit[] pitItem;
 	Wumpus[] wumpItem;
 	ClearGround[] cgItem;
-   public char temp[][]=new char[4][];
+	//Bondaries
+	final int TOP_CORNER=0;
+	final int DOWN_CORNER=3;
+	final int RIGHT_CORNER=3;
+	final int LEFT_CORNER=0;
+	int TARGET_CORNER;
+	//Boundaries
+	
+	
 	
    public int getRow() {
 		return row;
 	}
 
-
-
 	public void setRow(int row) {
 		this.row = row;
 	}
-
-
 
 	public int getColumn() {
 		return column;
 	}
 
-
-
 	public void setColumn(int column) {
 		this.column = column;
 	}
    
-   
-   
-   
-   
-   
-   
+	public int getGold() {
+		return TOTAL_GOLD;
+	}
+
+	public void setGold(int gold) {
+		this.TOTAL_GOLD=gold;
+	}
    
    /**
 	 * Initiates all the GameItem
@@ -78,7 +83,7 @@ public class Game {
 			
 		}
 		
-		System.out.println("Entered Gold");
+		//System.out.println("Entered Gold");
 		
 		/**
 		 * we can create objects for clear Ground at last after setting the player
@@ -96,23 +101,24 @@ public class Game {
 			
 		}
 		
-		System.out.println("Entered PIT");
+		//System.out.println("Entered PIT");
 		for(int i=0;i<TOTAL_WUMPUS;i++){
 			wumpItem[i]=new Wumpus(WUMPUS_CHARACTER);
 			setPosition(wumpItem[i]);
 		}
-		System.out.println("Entered Wumpus");
+		//System.out.println("Entered Wumpus");
 		
 		setPosition(); //Sets the Player
-		System.out.println("Entered Player");
+	/*	System.out.println("Entered Player");
 		
-		System.out.println("Going to Enter the Clear ground");
+		System.out.println("Going to Enter the Clear ground"); 
+		*/
 		for(int i=0;i<TOTAL_CG;i++){
 			cgItem[i]=new ClearGround(CLEAR_GROUND_CHARACTER);
 			
 		} 
 		setPosition(cgItem);
-		System.out.println("Entered Clear ground"); 
+		//System.out.println("Entered Clear ground"); 
 	
 }
 	/**
@@ -166,22 +172,24 @@ public class Game {
 		System.out.println("3) Move Player Up");
 		System.out.println("4) Move Player Down");
 		System.out.println("5) Quit");
-	}
-	
-	public void functionmenu(){
+		
 		Scanner sc=new Scanner(System.in);
 		int a=sc.nextInt();
 		switch(a){
 		case 1:
-			moveRight();
-			break;
-		case 2:
+			boundCheck();
 			moveLeft();
 			break;
+		case 2:
+			boundCheck();
+			moveRight();
+			break;
 		case 3:
+			boundCheck();
 			moveUp();
 			break;
 		case 4:
+			boundCheck();
 			moveDown();
 			break;
 		case 5:
@@ -194,19 +202,14 @@ public class Game {
 		}
 		
 	}
+
 	/**
 	 * Driver method to initiate the game and control the game
 	 */
 	public void runGame(){
-		
-		System.out.println("Going to set the Board");
 		setBoard();
-		System.out.println("Board has been set");
-		System.out.println("Going to display the board");
 		display();
-		System.out.println("Board has been displayed");
-		//menu();
-		//functionmenu();
+		menu();
 		
 	}
 	/**
@@ -224,118 +227,264 @@ public class Game {
 		int  TOTAL_GOLD=random.nextInt((3-1)+1)+1;
 		int numberOfGold= TOTAL_GOLD;
 		System.out.println("Gold number is "+numberOfGold);
+		setGold(numberOfGold);
 		return numberOfGold;
 		
 	}
 
 	private int cgGenerator(){
 		int numberOfCG=11-TOTAL_GOLD;
-		System.out.println("clear ground number "+numberOfCG);
+		//System.out.println("clear ground number "+numberOfCG);
 		return numberOfCG;
 	}
-
 	/**
 	 *End of function goldGenerator to generate the Number of Gold GameItem for the game.
 	 */
-	public void moveRight(){
-		if(board[row][column]=='*' && board[row][column+1]=='w'){
-			System.out.println("Player is Eaten by Wumpus");
+private void boundCheck(){
+	if(column ==0 ){
+		Object temp1= board[row][3] ==PLAYER_CHARACTER;
+		Object temp2=board[row][3]==WUMPUS_CHARACTER;
+		Object temp3=board[row][3]==PIT_CHARACTER;
+		Object temp4=board[row][3]==CLEAR_GROUND_CHARACTER;
+		Object temp5=board[row][3]==GOLD_CHARACTER;
+		if(temp1.equals(temp2)){
 			gameEnd();
 		}
-		else if(board[row][column]=='*' && board[row][column+1]=='.'){
-			temp[row][column]= board[row][column+1];
-			board[row][column+1]=board[row][column];
-			board[row][column]=temp[row][column];	
+		else if(temp1.equals(temp3)){
+			gameEnd();
 		}
-		else if(board[row][column]=='*' && board[row][column+1]=='g'){
-			board[row][column+1]=board[row][column];
-			board[row][column]='.';
-			System.out.println("Congrats Gold recieved");
+		else if(temp1.equals(temp4)){
+			Object temp=board[row][0];
+			board[row][0]=board[row][3];
+			board[row][3]=(char) temp;
+			updatePlayer(row ,3);
+		}
+		else if(temp1.equals(temp5)){
+			Object temp=board[row][0];
+			board[row][0]=board[row][3];
+			board[row][3]=(char) temp;
+			updatePlayer(row ,3);
+			System.out.println("***** Congrats Gold recieved *****");
 			 GOLD_COLLECT++;
+			   goldCount(GOLD_COLLECT);
 			    FLAG++;
-			    display();
-			    menu();
-		}
-		else if(board[row][column] =='*' && board[row][column+1] =='p'){
-			  System.out.println("Player fallen in Pit");
-		      gameEnd();
 		}
 	}
+	else if(column ==3){
+		Object temp=board[row][3];
+		board[row][3]=board[row][0];
+		board[row][0]=(char) temp;
+		updatePlayer(row , 0);
+	}
+	else if(row==0){
+		Object temp=board[0][column];
+		board[0][column]=board[3][column];
+		board[3][column]=(char) temp;
+		updatePlayer(3 ,column);
+	}
+	else if(row==3){
+		Object temp=board[3][column];
+		board[3][column]=board[0][column];
+		board[0][column]=(char) temp;
+		updatePlayer(0,column);
+	}
+}
+/*public void goldRecieved(){
+		System.out.println("***** Congrats Gold recieved *****");
+		 GOLD_COLLECT++;
+		   goldCount(GOLD_COLLECT);
+		    FLAG++;
+		    display();
+		    menu();
 	
-	
+} */
 	public void moveLeft(){
-		if(board[row][column]=='*' && board[row][column-1]=='w'){
-			System.out.println("Player is Eaten by Wumpus");
+		
+		if(column==LEFT_CORNER)
+		{
+			TARGET_CORNER=RIGHT_CORNER;
+		}
+		else
+		{
+			TARGET_CORNER =column;
+		}
+		
+		if(PLAYER_CHARACTER == board[row][column] && WUMPUS_CHARACTER ==board[row][TARGET_CORNER]){
+			System.out.println("===== Player is Eaten by Wumpus =====");
 			gameEnd();
 		}
-		else if(board[row][column]=='*' && board[row][column-1]=='.'){
-			temp[row][column]= board[row][column-1];
-			board[row][column-1]=board[row][column];
-			board[row][column]=temp[row][column];	
+		else if(PLAYER_CHARACTER == board[row][column] && CLEAR_GROUND_CHARACTER == board[row][TARGET_CORNER]){
+			Object temp= board[row][TARGET_CORNER];
+			board[row][TARGET_CORNER]=board[row][column];
+			board[row][column]=(char) temp;
+			updatePlayer( row, TARGET_CORNER);
+			 display();
+			 menu();
+			
 		}
-		else if(board[row][column]=='*' && board[row][column-1]=='g'){
-			board[row][column-1]=board[row][column];
+		else if(PLAYER_CHARACTER == board[row][column] && GOLD_CHARACTER ==board[row][TARGET_CORNER]){
+			board[row][TARGET_CORNER]=board[row][column];
 			board[row][column]='.';
-			System.out.println("Congrats Gold recieved");
+			//goldRecieved();
+			System.out.println("***** Congrats Gold recieved *****");
 			 GOLD_COLLECT++;
+			   goldCount(GOLD_COLLECT);
 			    FLAG++;
+			    updatePlayer( row, TARGET_CORNER);
 			    display();
 			    menu();
+			
+			   
+			  
 		}
-		else if(board[row][column] =='*' && board[row][column-1] =='p'){
-			  System.out.println("Player fallen in Pit");
+		else if( PLAYER_CHARACTER == board[row][column] && PIT_CHARACTER ==board[row][TARGET_CORNER]){
+			 System.out.println("===== Player fallen in Pit =====");
+		      gameEnd();
+		}
+		
+	}
+	public void moveRight(){ 
+		
+		if(column==RIGHT_CORNER)
+		{
+			TARGET_CORNER=LEFT_CORNER;
+		}
+		else
+		{
+			TARGET_CORNER =column;
+		}
+		
+		
+		
+		if(PLAYER_CHARACTER == board[row][column] && WUMPUS_CHARACTER ==board[row][TARGET_CORNER]){
+			System.out.println("===== Player is Eaten by Wumpus =====");
+			gameEnd();
+		}
+		else if(PLAYER_CHARACTER == board[row][column] && CLEAR_GROUND_CHARACTER == board[row][TARGET_CORNER]){
+			Object temp= board[row][TARGET_CORNER];
+			board[row][TARGET_CORNER]=board[row][column];
+			board[row][column]=(char) temp;
+			updatePlayer( row, TARGET_CORNER);
+			 display();
+			    menu();
+		
+		}
+		else if(PLAYER_CHARACTER == board[row][column] && GOLD_CHARACTER ==board[row][TARGET_CORNER]){
+			board[row][TARGET_CORNER]=board[row][column];
+			board[row][column]='.';
+			//goldRecieved();
+			System.out.println("***** Congrats Gold recieved *****");
+			 GOLD_COLLECT++;
+			   goldCount(GOLD_COLLECT);
+			    FLAG++;
+			    updatePlayer( row, TARGET_CORNER);
+			    display();
+			    menu();
+			
+			   
+	
+		}
+		else if( PLAYER_CHARACTER == board[row][column] && PIT_CHARACTER ==board[row][TARGET_CORNER]){
+			 System.out.println("===== Player fallen in Pit =====");
 		      gameEnd();
 		}
 	}
-	
 	public void moveUp(){
-		if(board[row][column]=='*' && board[row-1][column]=='w'){
-			System.out.println("Player is Eaten by Wumpus");
+		
+		if(row==TOP_CORNER)
+		{
+			TARGET_CORNER=DOWN_CORNER;
+		}
+		else
+		{
+			TARGET_CORNER =row;
+		}
+		
+		
+		
+		if(PLAYER_CHARACTER == board[row][column] && WUMPUS_CHARACTER ==board[TARGET_CORNER][column]){
+			System.out.println("===== Player is Eaten by Wumpus =====");
 			gameEnd();
 		}
-		else if(board[row][column]=='*' && board[row-1][column]=='.'){
-			temp[row][column]= board[row-1][column];
-			board[row-1][column]=board[row][column];
-			board[row][column]=temp[row][column];	
+		else if(PLAYER_CHARACTER == board[row][column] && CLEAR_GROUND_CHARACTER == board[TARGET_CORNER][column]){
+			Object temp= board[TARGET_CORNER][column];
+			board[TARGET_CORNER][column]=board[row][column];
+			board[row][column]=(char) temp;
+			updatePlayer( TARGET_CORNER, column);
+			 display();
+			    menu();
+		
 		}
-		else if(board[row][column]=='*' && board[row-1][column]=='g'){
+		else if(PLAYER_CHARACTER == board[row][column] && GOLD_CHARACTER ==board[TARGET_CORNER][column]){
 			board[row-1][column]=board[row][column];
 			board[row][column]='.';
-			System.out.println("Congrats Gold recieved");
+			//goldRecieved();
+			System.out.println("***** Congrats Gold recieved *****");
 			 GOLD_COLLECT++;
+			   goldCount(GOLD_COLLECT);
 			    FLAG++;
+			    updatePlayer( TARGET_CORNER, column);
 			    display();
 			    menu();
+			 
+			    
 		}
-		else if(board[row][column] =='*' && board[row-1][column] =='p'){
-			  System.out.println("Player fallen in Pit");
+		else if( PLAYER_CHARACTER == board[row][column] && PIT_CHARACTER ==board[TARGET_CORNER][column]){
+			 System.out.println("===== Player fallen in Pit =====");
 		      gameEnd();
 		}
 	}
 		
 	public void moveDown(){
-		if(board[row][column]=='*' && board[row+1][column]=='w'){
-			System.out.println("Player is Eaten by Wumpus");
+		
+		if(row==DOWN_CORNER)
+		{
+			TARGET_CORNER=TOP_CORNER;
+		}
+		else
+		{
+			TARGET_CORNER =row;
+		}
+		
+		
+		if(PLAYER_CHARACTER == board[row][column] && WUMPUS_CHARACTER ==board[TARGET_CORNER][column]){
+			System.out.println("===== Player is Eaten by Wumpus =====");
 			gameEnd();
 		}
-		else if(board[row][column]=='*' && board[row+1][column]=='.'){
-			temp[row][column]= board[row-1][column];
-			board[row+1][column]=board[row][column];
-			board[row][column]=temp[row][column];	
+		else if(PLAYER_CHARACTER == board[row][column] && CLEAR_GROUND_CHARACTER == board[TARGET_CORNER][column]){
+			Object temp= board[TARGET_CORNER][column];
+			board[TARGET_CORNER][column]=board[row][column];
+			board[row][column]=(char) temp;
+			updatePlayer( TARGET_CORNER, column);
+			 display();
+			    menu();
+			    
 		}
-		else if(board[row][column]=='*' && board[row+1][column]=='g'){
-			board[row+1][column]=board[row][column];
+		else if(PLAYER_CHARACTER == board[row][column] && GOLD_CHARACTER ==board[TARGET_CORNER][column]){
+			board[TARGET_CORNER][column]=board[row][column];
 			board[row][column]='.';
-			System.out.println("Congrats Gold recieved");
+			//goldRecieved();
+			System.out.println("***** Congrats Gold recieved *****");
 			 GOLD_COLLECT++;
+			   goldCount(GOLD_COLLECT);
 			    FLAG++;
+			    updatePlayer( TARGET_CORNER, column);
 			    display();
 			    menu();
+			
+			  
 		}
-		else if(board[row][column] =='*' && board[row+1][column] =='p'){
-			  System.out.println("Player fallen in Pit");
+		else if( PLAYER_CHARACTER == board[row][column] && PIT_CHARACTER ==board[TARGET_CORNER][column]){
+			 System.out.println("===== Player fallen in Pit =====");
 		      gameEnd();
 		}
+	}
+	
+	private void goldCount(int gold){
+		int goldGen = getGold();
+		if(GOLD_COLLECT == goldGen){
+		gameEnd();
+	}
 	}
 	/**
 	 * Sets the position(Row and Column) of the individual GameItem
@@ -379,7 +528,14 @@ public class Game {
 		
 	}
 	
-	
+	private void updatePlayer(int rrow,int ccolumn){
+		int row=rrow;
+		int column=ccolumn;
+		setRow(row);
+		setColumn(column);
+	board[row][column]=PLAYER_CHARACTER;
+	}
+
 	
 	private void setPosition(ClearGround[] cg)
 	{	
@@ -393,7 +549,7 @@ public class Game {
 					board[i][j] = CLEAR_GROUND_CHARACTER;
 					cg[currentCG].setRowPosition(i);
 					cg[currentCG].setColumnPosition(j);
-					System.out.println("Entered CG for position "+(currentCG+1));
+					//System.out.println("Entered CG for position "+(currentCG+1));
 					currentCG+=1;					
 				}
 				
@@ -401,35 +557,17 @@ public class Game {
 					
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	/**Navigation method
-	 * 
-	 */
-	
-	
-	
-	
-	
-	/**
-	 * End of Navigation method
-	 */
-	
+
 	
 	public void gameEnd(){
 		if(FLAG == 0){   
 			System.out.println("=====GAME END=====");
+			System.exit(0); 
 		}
 		else{
 			System.out.println("Gold Collected is "+GOLD_COLLECT);
 			System.out.println("*****Congrats you played well*****");
+			System.exit(0); 
 		}
 		
 	}
